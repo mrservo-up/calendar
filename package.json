@@ -1,0 +1,11 @@
+{
+  "name": "IS226 Project",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mrservo-up/calendar"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "sqlite3": "^5.1.7"
+  }
+}

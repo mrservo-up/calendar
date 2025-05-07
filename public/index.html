@@ -1,44 +1,82 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title>Calendar Method</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="https://uicdn.toast.com/calendar/latest/toastui-calendar.min.css" />
-        <script src="https://uicdn.toast.com/calendar/latest/toastui-calendar.min.js"></script>
-        <script>
-            function imageLoader(fullpath, id) {
-                fetch(fullpath).then(response => response.text())
-                .then(b64img => {
-                    document.getElementById(id).src = b64img;
-                });
-            }
-            
-        </script>
-        <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
-        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-        <link rel="stylesheet" href="css/style.css">
-    </head>
-    <body class="bg-gray-100 font-sans antialiased">
-        <h1 class="text-2xl">Calendar Method</h1><br>
-        <div id="calendar" class="h-full border-2 border-gray-300 border-opacity-60 rounded-lg overflow-hidden"></div>
-        <script src="/js/app.js"></script>
-        
-        <form>
-            <div class="flex flex-col mt-4" style="width: 30%;">
-                <label for="1st_mens" class="mb-2 text-lg">1st Day of Last Menstruation:</label>
-                <input type="date" id="1st_mens" name="1st_mens" class="mb-4">
-                <label for="period_length" class="mb-2 text-lg">Length of Menstrual Period</label>
-                <select type="select" id="period_length" name="period_length" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                    <option value="26">26</option>
-                    <option value="27">27</option>
-                    <option value="28" selected>28</option>
-                    <option value="29">29</option>
-                    <option value="30">30</option>
-                    <option value="31">31</option>
-                    <option value="32">32</option>
-                </select>  
+<head>
+    <meta charset="UTF-8">
+    <title>Calendar Method</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://uicdn.toast.com/calendar/latest/toastui-calendar.min.css" />
+    <script src="https://uicdn.toast.com/calendar/latest/toastui-calendar.min.js"></script>
+
+    <script>
+        // Use image loader for AWS Lambda function to display images saved as base64 text file
+        // https://stackoverflow.com/questions/73417589/how-to-display-a-base64-image-that-is-inside-a-txt-file-on-the-img-src
+        function imageLoader(fullpath, id) {
+            fetch(fullpath).then(response => response.text())
+            .then(b64img => {
+                document.getElementById(id).src = b64img;
+            });
+        }
+    </script>
+    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-gray-100 font-sans antialiased">
+    <h1 class="text-2xl">Standard Days Method</h1><br>
+    <div id="calendar" class="h-full border-2 border-gray-300 border-opacity-60 rounded-lg overflow-hidden"></div>
+    <script src="/js/app.js"></script>
+    
+    <form onsubmit="event.preventDefault()" id="form" class="flex flex-col items-center">
+        <div class="flex flex-col mt-4" style="width: 30%;">
+            <label for="1st_mens" class="mb-2 text-lg">1st Day of Last Menstruation:</label>
+            <input type="date" id="1st_mens" name="1st_mens" class="mb-4">
+            <label for="period_length" class="mb-2 text-lg">Length of Menstrual Period</label>
+            <select type="select" id="period_length" name="period_length" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                <option value="26">26</option>
+                <option value="27">27</option>
+                <option value="28" selected>28</option>
+                <option value="29">29</option>
+                <option value="30">30</option>
+                <option value="31">31</option>
+                <option value="32">32</option>
+            </select>
+            <input type="button" id="submit" value="Submit" class="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+        </div>
+    </form>
+
+    <div id="other_methods">
+        <div class="border-b border-slate-200">
+            <button onclick="toggleAccordion(1)" class="w-full flex justify-between items-center py-5 text-slate-800">
+            <span>Standar Days Method (SDM)</span>
+            <span id="icon-1" class="text-slate-800 transition-transform duration-300">
+            </span>
+            </button>
+            <div id="content-1" class="max-h-0 overflow-hidden transition-all duration-300 ease-in-out">
+            <div class="pb-5 text-sm text-slate-500">
+                    The SDM is based on the physiology of the menstrual cycle and the functional life span of the
+                ovum and the sperm. It can be used by women if their menstrual cycles are 26 to 32 days long. The
+                client uses color-coded CycleBeads to mark the fertile and infertile days of her menstrual cycle
+                and to monitor her cycle length. Clients using this method abstain from sexual intercourse on fertile
+                days (days 8 to 19) to avoid pregnancy.
             </div>
-        </form>
-    </body>
+            </div>
+        </div>
+        <div class="border-b border-slate-200">
+            <button onclick="toggleAccordion(2)" class="w-full flex justify-between items-center py-5 text-slate-800">
+            <span>Two-Day Method</span>
+            <span id="icon-2" class="text-slate-800 transition-transform duration-300">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4">
+            </span>
+            </button>
+            <div id="content-2" class="max-h-0 overflow-hidden transition-all duration-300 ease-in-out">
+            <div class="pb-5 text-sm text-slate-500">
+                    The Two-Day Method is a FAB method that involves cervical secretions as an
+                indicator of fertility and women checking the presence of secretions every day.
+                If a woman notices any secretions today or yesterday, she should consider herself
+                fertile and avoid intercourse today.
+            </div>
+            </div>
+        </div>
+    </div>
+</body>
 </html>

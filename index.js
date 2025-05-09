@@ -8,10 +8,14 @@ const port = process.env.PORT || 3000;
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Default route to serve index.html
-app.get('/', (req, res) => {
+app.get('/index', (req, res) => {
     res.sendFile(path.join(__dirname, 'public/index.html'));
 });
 
+// signin route
+app.get('/signin', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public/signin.html'));
+});
 
 // Start server
 app.listen(port, () => {

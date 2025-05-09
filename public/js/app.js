@@ -13,6 +13,21 @@
     placeSVGs("dropdown-icon-1");
     placeSVGs("icon-1");
     placeSVGs("icon-2");
+
+    document.getElementById("sign_in_out").addEventListener("click", function() {
+        const signInOutButton = this;
+        // Toggle the button text and class
+        if (signInOutButton.innerText === "Sign In as Admin") {
+            signInOutButton.innerText = "Sign Out";
+            signInOutButton.classList.remove("bg-blue-500");
+            signInOutButton.classList.add("bg-red-500");
+            window.location.href = "/signin";
+        } else {
+            signInOutButton.innerText = "Sign In as Admin";
+            signInOutButton.classList.remove("bg-red-500");
+            signInOutButton.classList.add("bg-blue-500");
+        }
+    });
 });
 
 // SVG for Down icon

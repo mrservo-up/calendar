@@ -21,7 +21,7 @@
             signInOutButton.innerText = "Sign Out";
             signInOutButton.classList.remove("bg-blue-500");
             signInOutButton.classList.add("bg-red-500");
-            window.location.href = "/signin";
+            window.location.replace("/signin");
         } else {
             signInOutButton.innerText = "Sign In as Admin";
             signInOutButton.classList.remove("bg-red-500");

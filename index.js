@@ -5,8 +5,8 @@ const app = express();
 const port = process.env.PORT || 3000;
 const multer = require('multer');
 const { json } = require('stream/consumers');
-var session = require('express-session');
-var cookieParser = require('cookie-parser');
+const session = require('express-session');
+const cookieParser = require('cookie-parser');
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -18,7 +18,7 @@ app.use(session({
     cookie      : { secure: false } // Set to true if using HTTPS
 }));
 
-var Users = [];
+const Users = [];
 
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
@@ -39,14 +39,7 @@ app.get('/signin', (req, res) => {
 app.post('/signin', (req, res) => {
     var db = require('./db.js');
 
-    // Handle sign-in logic here
-    // For example, check credentials and redirect accordingly
     const { email, password } = req.body;
-
-    // db.createTableUsers();
-    // db.insertUser(email, password);
-    // console.log('User inserted:', email);
-    // res.redirect('/index');
 
     db.verifyUser(email, password).then((result) => {
         console.log('Verification result:', result);
@@ -85,7 +78,6 @@ app.post('/admin', (req, res) => {
             res.redirect('/signin');
         }
     });
-
 });
 
 // from https://www.tutorialspoint.com/expressjs/expressjs_authentication.htm

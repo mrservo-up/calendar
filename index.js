@@ -32,14 +32,37 @@ app.post('/signin', (req, res) => {
     // For example, check credentials and redirect accordingly
     const { email, password } = req.body;
 
-    console.log('Received sign-in request:', email, password);
+    // db.createTableUsers();
+    // db.insertUser(email, password);
+    // console.log('User inserted:', email);
+    // res.redirect('/index');
 
-    var message = db.verifyUser(email, password)
-    if (message) {
-        res.redirect('/signin', { message: message });
-    } else {
-        res.redirect('/index');
+
+    console.log('Received sign-in request:', email);
+
+    db.verifyUser(email, password).then((result) => {
+        console.log('Verification result:', result);
+        if (result === "User verified:") {
+            console.log('User verified:', email);
+            res.redirect('/index');
+        }
+        else if (result === "Invalid password") {
+            console.log('Invalid password:', email);
+            res.send("Invalid password");
+        }
+        else if (result === "User not found") {
+            console.log('User not found:', email);
+            res.send("User not found");
+        }
+        else {
+            console.log('Unknown error:', result);
+            res.send("Unknown error");
+        }
     }
+    ).catch((error) => {
+        console.error('Error during verification:', error);
+        return "Error during verification";
+    });
 });
 
 

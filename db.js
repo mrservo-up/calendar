@@ -1,18 +1,26 @@
 const sqlite3 = require('sqlite3').verbose()
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
- const bcrypt = require('bcrypt');
+const bcrypt = require('bcrypt');
+const { hash } = require('crypto');
 
-async function hashPassword(password) {
-    const saltRounds = 10;
-    const salt = await bcrypt.genSalt(saltRounds);
+async function hashPassword(password, salt) {
+    if (!salt) {
+        const saltRounds = 10;
+        salt = await bcrypt.genSalt(saltRounds);
+    }
     const hashedPassword = await bcrypt.hash(password, salt);
-    return hashedPassword;
+    return {
+        hashedPassword, 
+        salt
+    };
 }
 
-async function verifyPassword(password, hashedPassword) {
-    const match = await bcrypt.compare(password, hashedPassword);
-    return match;
+async function verifyPassword(password, hashedPassword, salt) {
+    if (hashedPassword === (await hashPassword(password, salt)).hashedPassword) {
+        return true;
+    }
+    return false;
 }
 
 const dbPath = path.join(__dirname, './', 'site.db');
@@ -26,23 +34,33 @@ const db = new sqlite3.Database(dbPath, (err) => {
 
 
 var verifyUser = function(username, password) {
-    db.serialize(() => {
-        console.log('Verifying user:', username);
+    // Use async/await to handle the asynchronous nature of SQLite queries
+    // This function will return a promise that resolves when the query is complete
+    // and the user is verified or not.
+    // The function will return "User verified:" if the user is found and the password matches,
+    // "Invalid password" if the password does not match, and "User not found" if the user does not exist.
+    // The function will also log the result to the console.
+    // The function will also log any errors that occur during the query.
+    // The function will also log the user object if the user is found.
+    // Return a promise to handle async behavior
+    return new Promise((resolve, reject) => {
         db.get("SELECT * FROM users WHERE username = ?", [username], async (err, row) => {
             if (err) {
-                console.error('Error querying database ' + err.message);
+                console.error('Error querying database 2 ' + err.message);
+                reject(err);
             } else {
                 if (row) {
-                    const match = await verifyPassword(password, row.password);
+                    const match = await verifyPassword(password, row.password, row.salt);
                     if (match) {
                         console.log('User verified:', row);
-                        return false;
+                        resolve("User verified:");
                     } else {
                         console.log('Invalid password');
-                        return "Invalid password";
+                        resolve("Invalid password");
                     }
                 } else {
                     console.log('User not found');
+                    resolve("User not found");
                 }
             }
         });
@@ -55,7 +73,8 @@ var createTableUsers = function() {
         db.run(`CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT NOT NULL,
-            password TEXT NOT NULL
+            password TEXT NOT NULL,
+            salt TEXT NOT NULL
         )`, (err) => {
             if (err) {
                 console.error('Error creating table ' + err.message);
@@ -68,11 +87,15 @@ var createTableUsers = function() {
 
 var insertUser = function(username, password) {
     db.serialize(() => {
-        const stmt = db.prepare("INSERT INTO users (username, password) VALUES (?, ?)");
-        stmt.run(username, hashPassword(password));
-        stmt.finalize();
+        var hashed = hashPassword(password, false).then((hashed) => {
+            // Use the hashed password and salt to insert into the database
+            const stmt = db.prepare("INSERT INTO users (username, password, salt) VALUES (?, ?, ?)");
+            stmt.run(username, hashed.hashedPassword, hashed.salt);
+            stmt.finalize();
+        });
     });
 }
+
 var queryUsers = function() {
     db.serialize(() => {
         db.all("SELECT * FROM users", [], (err, rows) => {

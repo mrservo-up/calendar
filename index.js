@@ -5,10 +5,20 @@ const app = express();
 const port = process.env.PORT || 3000;
 const multer = require('multer');
 const { json } = require('stream/consumers');
-const upload = multer({ dest: 'uploads/' });
+var session = require('express-session');
+var cookieParser = require('cookie-parser');
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(cookieParser());
+app.use(session({
+    secret      : 'your_secret_key',
+    resave      : false,
+    saveUninitialized: false,
+    cookie      : { secure: false } // Set to true if using HTTPS
+}));
+
+var Users = [];
 
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
@@ -58,6 +68,52 @@ app.post('/signin', (req, res) => {
         console.error('Error during verification:', error);
         return "Error during verification";
     });
+});
+
+app.post('/admin', (req, res) => {
+    // recheck user credentials and set session
+    var db = require('./db.js');
+    const { email, password } = req.body;
+    db.verifyUser(email, password).then((result) => {
+        console.log('Verification result:', result);
+        if (result === "User verified:") {
+            Users.push(email); // Add user to Users array
+            req.session.user = email; // Store user in session
+            res.redirect('/dashboard');
+        }
+        else {
+            res.redirect('/signin');
+        }
+    });
+
+});
+
+// from https://www.tutorialspoint.com/expressjs/expressjs_authentication.htm
+function checkSignIn(req, res, next){
+   if(req.session.user){
+      next();     //If session exists, proceed to page
+   } else {
+      var err = new Error("Not logged in!");
+      console.log(req.session.user);
+      res.redirect('/signin'); // redirect to login page
+   }
+}
+
+app.get('/logout', function(req, res){
+   req.session.destroy(function(){
+      console.log("user logged out.")
+   });
+   res.redirect('/index');
+});
+
+app.get('/dashboard', checkSignIn, (req, res) => {
+    console.log('User:', req.session.user);
+    res.sendFile(path.join(__dirname, 'public/dashboard.html'));
+});
+
+app.get('/admin', checkSignIn, (req, res) => {
+    console.log('User:', req.session.user);
+    res.sendFile(path.join(__dirname, 'public/admin.html'));
 });
 
 

@@ -4,10 +4,11 @@ const path = require('path');
 const app = express();
 const port = process.env.PORT || 3000;
 const multer = require('multer');
+const { json } = require('stream/consumers');
 const upload = multer({ dest: 'uploads/' });
 
 app.use(express.urlencoded({ extended: true }));
-
+app.use(express.json());
 
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
@@ -37,26 +38,20 @@ app.post('/signin', (req, res) => {
     // console.log('User inserted:', email);
     // res.redirect('/index');
 
-
-    console.log('Received sign-in request:', email);
-
     db.verifyUser(email, password).then((result) => {
         console.log('Verification result:', result);
         if (result === "User verified:") {
-            console.log('User verified:', email);
-            res.redirect('/index');
+            res.send(JSON.stringify({'adminh_url':'/admin'}));
         }
         else if (result === "Invalid password") {
-            console.log('Invalid password:', email);
-            res.send("Invalid password");
+            res.send(JSON.stringify({'message':'Invalid password: '}));
         }
         else if (result === "User not found") {
-            console.log('User not found:', email);
-            res.send("User not found");
+            res.send(JSON.stringify({'message':'User not found'}));
         }
         else {
             console.log('Unknown error:', result);
-            res.send("Unknown error");
+            res.send(JSON.stringify({'message':'Unknown error'}));
         }
     }
     ).catch((error) => {

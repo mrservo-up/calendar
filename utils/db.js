@@ -1,29 +1,7 @@
 const sqlite3 = require('sqlite3').verbose()
 const path = require('path');
-const { v4: uuidv4 } = require('uuid');
-const bcrypt = require('bcrypt');
-const { hash } = require('crypto');
-
-async function hashPassword(password, salt) {
-    if (!salt) {
-        const saltRounds = 10;
-        salt = await bcrypt.genSalt(saltRounds);
-    }
-    const hashedPassword = await bcrypt.hash(password, salt);
-    return {
-        hashedPassword, 
-        salt
-    };
-}
-
-async function verifyPassword(password, hashedPassword, salt) {
-    if (hashedPassword === (await hashPassword(password, salt)).hashedPassword) {
-        return true;
-    }
-    return false;
-}
-
-const dbPath = path.join(__dirname, './', 'site.db');
+const { hashPassword, verifyPassword } = require('./password.js');
+const dbPath = path.join(__dirname, '../', 'site.db');
 const db = new sqlite3.Database(dbPath, (err) => {
     if (err) {
         console.error('Error opening database ' + err.message);
@@ -31,6 +9,10 @@ const db = new sqlite3.Database(dbPath, (err) => {
         console.log('Connected to the database.');
     }
 });
+
+var getDbPath = function() {
+    return dbPath;
+}
 
 
 var verifyUser = function(username, password) {
@@ -125,5 +107,6 @@ module.exports = {
     verifyUser,
     insertUser,
     queryUsers,
-    closeDB
+    closeDB,
+    getDbPath
 };

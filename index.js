@@ -1,6 +1,7 @@
 const express = require('express');
 // const serverless = require("serverless-http");
 const path = require('path');
+const fs = require('fs');
 const app = express();
 const port = process.env.PORT || 3000;
 const multer = require('multer');
@@ -37,7 +38,7 @@ app.get('/signin', (req, res) => {
 });
 
 app.post('/signin', (req, res) => {
-    var db = require('./db.js');
+    var db = require('./utils/db.js');
 
     const { email, password } = req.body;
 
@@ -65,7 +66,7 @@ app.post('/signin', (req, res) => {
 
 app.post('/admin', (req, res) => {
     // recheck user credentials and set session
-    var db = require('./db.js');
+    var db = require('./utils/db.js');
     const { email, password } = req.body;
     db.verifyUser(email, password).then((result) => {
         console.log('Verification result:', result);
@@ -106,6 +107,17 @@ app.get('/dashboard', checkSignIn, (req, res) => {
 app.get('/admin', checkSignIn, (req, res) => {
     console.log('User:', req.session.user);
     res.sendFile(path.join(__dirname, 'public/admin.html'));
+});
+
+app.post('/add_user', checkSignIn, (req, res) => {
+    var obj = require('./models/users.js');
+    const { email, password } = req.body;
+    console.log('Creating user object for:', email);
+    const user = new obj.User();
+    user.username = email;
+    user.password = password;
+    console.log('Saving:', user);
+    user.save();
 });
 
 

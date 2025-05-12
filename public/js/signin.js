@@ -6,6 +6,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const form = document.getElementById("signin-form");
         const formData = new FormData(form);
         const data = Object.fromEntries(formData.entries());
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
         fetch('/signin', {
             method: 'POST',
             headers: {

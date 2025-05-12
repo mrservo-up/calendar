@@ -29,11 +29,18 @@ app.get('/index', (req, res) => {
     res.sendFile(path.join(__dirname, 'public/index.html'));
 });
 
+app.post('/compute', (req, res) => {
+    const { age, first_day_of_mens, period_length, cycle_length } = req.body;
+    require('./utils/compute_calendar.js');
+    const obj = require('./utils/compute_calendar.js');
+    obj.compute_calendar(age, first_day_of_mens, period_length, cycle_length).then((result) => {
+        console.log('Result:', result);
+        res.send(JSON.stringify(result));
+    });
+});
+
 // signin route
 app.get('/signin', (req, res) => {
-    if (req.body && req.body.message) {
-        console.log('Received message:', req.body.message);
-    }
     res.sendFile(path.join(__dirname, 'public/signin.html'));
 });
 

@@ -1,4 +1,4 @@
-const obj = require('./models/records.js');
+require('./models/records.js');
 
 var compute_calendar = function(age, first_day_of_mens, period_length, cycle_length) {
     return new Promise((resolve, reject) => {
@@ -79,4 +79,16 @@ var compute_calendar = function(age, first_day_of_mens, period_length, cycle_len
     });
 }
 
-exports.compute_calendar = compute_calendar;
+var saveQuery = function(age, first_day_of_mens, period_length, cycle_length) {
+    var obj = new MainRecords();
+    obj.age = age;
+    obj.first_day_of_mens = first_day_of_mens;
+    obj.period_length = period_length;
+    obj.cycle_length = cycle_length;
+    return obj.save();
+}
+
+module.exports = {
+    compute_calendar: compute_calendar,
+    saveQuery: saveQuery
+};

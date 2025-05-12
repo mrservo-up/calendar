@@ -35,7 +35,35 @@ app.post('/compute', (req, res) => {
     const obj = require('./utils/compute_calendar.js');
     obj.compute_calendar(age, first_day_of_mens, period_length, cycle_length).then((result) => {
         console.log('Result:', result);
+
+        obj.saveQuery(age, first_day_of_mens, period_length, cycle_length).then((result) => {
+            console.log('Saved:', result);
+        });
         res.send(JSON.stringify(result));
+    });
+});
+
+app.post('/feedback', (req, res) => {
+    const { willing_to_try, another_method, others } = req.body;
+    const obj = require('./utils/feedback_saving.js');
+    obj.save_feedback(willing_to_try, another_method, others).then((result) => {
+        console.log('Feedback saved:', result);
+        res.send(JSON.stringify(result));
+    }).catch((error) => {
+        console.error('Error saving feedback:', error);
+        res.status(500).send(JSON.stringify({'message':'Error saving feedback'}));
+    });
+});
+
+app.post('/fpmethods', (req, res) => {
+    const obj = require('./models/fpmethods.js');
+    const fpmethods = new obj.FPMethods();
+    fpmethods.getAll().then((result) => {
+        console.log('FPMethods:', result);
+        res.send(JSON.stringify(result));
+    }).catch((error) => {
+        console.error('Error getting FPMethods:', error);
+        res.status(500).send(JSON.stringify({'message':'Error getting FPMethods'}));
     });
 });
 
@@ -111,6 +139,10 @@ app.get('/dashboard', checkSignIn, (req, res) => {
     res.sendFile(path.join(__dirname, 'public/dashboard.html'));
 });
 
+app.get('/chartdata', checkSignIn, (req, res) => {
+    
+});
+
 app.get('/admin', checkSignIn, (req, res) => {
     console.log('User:', req.session.user);
     res.sendFile(path.join(__dirname, 'public/admin.html'));
@@ -127,6 +159,48 @@ app.post('/add_user', checkSignIn, (req, res) => {
     user.save();
 });
 
+app.post('/get_users', checkSignIn, (req, res) => {
+    var obj = require('./models/users.js');
+    const user = new obj.User();
+    user.getAll().then((result) => {
+        console.log('Users:', result);
+        res.send(JSON.stringify(result));
+    }).catch((error) => {
+        console.error('Error getting users:', error);
+        res.status(500).send(JSON.stringify({'message':'Error getting users'}));
+    });
+});
+
+app.post('/delete_user', checkSignIn, (req, res) => {
+    var obj = require('./models/users.js');
+    const { email } = req.body;
+    console.log('Deleting user:', email);
+    const user = new obj.User();
+    user.username = email;
+    user.delete().then((result) => {
+        console.log('User deleted:', result);
+        res.send(JSON.stringify(result));
+    }).catch((error) => {
+        console.error('Error deleting user:', error);
+        res.status(500).send(JSON.stringify({'message':'Error deleting user'}));
+    });
+});
+
+app.post('/update_user', checkSignIn, (req, res) => {
+    var obj = require('./models/users.js');
+    const { email, password } = req.body;
+    console.log('Updating user:', email);
+    const user = new obj.User();
+    user.username = email;
+    user.password = password;
+    user.update().then((result) => {
+        console.log('User updated:', result);
+        res.send(JSON.stringify(result));
+    }).catch((error) => {
+        console.error('Error updating user:', error);
+        res.status(500).send(JSON.stringify({'message':'Error updating user'}));
+    });
+});
 
 // Start server
 app.listen(port, () => {
